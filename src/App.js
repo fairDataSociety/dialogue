@@ -25,18 +25,6 @@ async function asyncForEach(array, callback) {
   }
 }
 
-
-
-let statuslog = (e) => {
-    window.app.setStatus(e);
-    console.log(e);
-}
-let errorlog = (e) => {
-  window.app.setError(e);
-  console.error(e);
-}
-
-
 class App extends React.Component {
   constructor(props, context) {
     super(props);
@@ -58,6 +46,8 @@ class App extends React.Component {
     this.checkMessages = this.checkMessages.bind(this);
     this.getReceivedMessages = this.getReceivedMessages.bind(this);
     this.getSentMessages = this.getSentMessages.bind(this);
+    this.setStatus = this.setStatus.bind(this);
+    this.setError = this.setError.bind(this);
     this.Init();
   }
   componentDidMount() {
@@ -72,17 +62,17 @@ class App extends React.Component {
   async createAccount(accountName, password)
   {
     try {
-       let account = await window.FDS.CreateAccount(accountName, password, statuslog, errorlog);   
+       let account = await window.FDS.CreateAccount(accountName, password, this.setStatus, this.setError);   
        await this.setAccount(account);
     } catch(err) { 
-        errorlog(err);
+       this.setError(err);
     }
     await this.unlockAccount(accountName, password);
   }
   async unlockAccount(accountName, password)
   {
     this.setStatus("unlocking");
-    let account = await window.FDS.UnlockAccount(accountName, password, statuslog, errorlog);
+    let account = await window.FDS.UnlockAccount(accountName, password, this.setStatus, this.setError);   
     this.setAccount(account); 
     this.setStatus("unlocked acount");
   
@@ -158,8 +148,8 @@ class App extends React.Component {
     }
   }
 
-  setStatus(s)          { this.setState({status:""+s}); }
-  setError(e)           { this.setState({error:""+e}); }      
+  setStatus(s)          { this.setState({status:""+s}); console.log(s); }
+  setError(e)           { this.setState({error:""+e}); console.error(e); }      
 
   async setAccount(a)          {
     this.setStatus("setting account"); 
@@ -182,13 +172,13 @@ class App extends React.Component {
 
   async checkContact (recepientName) {
     try  {
-      await this.state.account.lookupContact(recepientName, statuslog, statuslog, statuslog);
-      errorlog("");
-      statuslog("recepient valid");
+      await this.state.account.lookupContact(recepientName, this.setStatus, this.setStatus, this.setStatus);
+      this.setError("");
+      this.setStatus("recepient valid");
       this.setRecepientValid(true);
     } catch(err) {
       this.setRecepientValid(false);
-      errorlog(err);
+      this.setError(err);
     }
   }
 
@@ -205,10 +195,10 @@ class App extends React.Component {
     var file = new File([`${message}`], `msg-${r}.txt`, { type: 'text/plain' });
     try
     {
-      await this.state.account.send(toAccountSubdomain, file, this.state.applicationDomain, statuslog, statuslog, statuslog);
-      statuslog(`sent ${message} as ${file.name}`);
+      await this.state.account.send(toAccountSubdomain, file, this.state.applicationDomain, this.setStatus, this.setStatus, this.setStatus);
+      this.setStatus(`sent ${message} as ${file.name}`);
     } catch(err)  {
-        this.errorlog(err);
+      this.setError(err);
     }
   } 
 
