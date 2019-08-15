@@ -33,7 +33,7 @@ let statuslog = (e) => {
 }
 let errorlog = (e) => {
   window.app.setError(e);
-  console.log(e);
+  console.error(e);
 }
 
 
@@ -75,8 +75,7 @@ class App extends React.Component {
        let account = await window.FDS.CreateAccount(accountName, password, statuslog, errorlog);   
        await this.setAccount(account);
     } catch(err) { 
-        console.error(err); 
-        this.setError(err);
+        errorlog(err);
     }
     await this.unlockAccount(accountName, password);
   }
@@ -209,7 +208,7 @@ class App extends React.Component {
       await this.state.account.send(toAccountSubdomain, file, this.state.applicationDomain, statuslog, statuslog, statuslog);
       statuslog(`sent ${message} as ${file.name}`);
     } catch(err)  {
-        console.err(err);
+        this.errorlog(err);
     }
   } 
 
@@ -222,7 +221,6 @@ class App extends React.Component {
 
       if(this.state.recepientValid!==true)
         recepientValid = <div>Invalid recepient</div>;
-
 
       userAccount = <div>{this.state.accountName}</div> 
       messages =  <div>
